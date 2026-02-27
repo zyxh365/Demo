@@ -1,0 +1,95 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>TSP 实时链路看板</title>
+    <style>
+      body { font-family: Arial, sans-serif; margin: 20px; background: #f5f7fb; color: #1e293b; }
+      .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 12px; margin-bottom: 16px; }
+      .card { background: white; border-radius: 10px; padding: 12px; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+      .title { font-size: 12px; color: #64748b; }
+      .value { font-size: 24px; margin-top: 6px; }
+      .section { margin-top: 14px; }
+      table { width: 100%; border-collapse: collapse; background: white; }
+      th, td { border-bottom: 1px solid #e2e8f0; text-align: left; padding: 8px; font-size: 13px; }
+      .toolbar { display:flex; gap: 8px; margin-bottom:10px; }
+      input, button { padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; }
+      button { cursor: pointer; background: #2563eb; color: white; border: none; }
+      pre { background: #0f172a; color:#e2e8f0; padding:10px; border-radius:8px; overflow:auto; }
+    </style>
+  </head>
+  <body>
+    <h1>TSP 远控链路实时看板</h1>
+    <div class="toolbar">
+      <button onclick="simulate()">模拟一条指令</button>
+      <input id="traceInput" placeholder="输入 traceId 查询" style="min-width:320px" />
+      <button onclick="searchTrace()">查询 Trace</button>
+    </div>
+
+    <div class="grid">
+      <div class="card"><div class="title">5分钟总指令数</div><div class="value" id="total">0</div></div>
+      <div class="card"><div class="title">成功率</div><div class="value" id="success">0%</div></div>
+      <div class="card"><div class="title">超时率</div><div class="value" id="timeout">0%</div></div>
+      <div class="card"><div class="title">P95/P99 时延</div><div class="value" id="latency">0/0 ms</div></div>
+    </div>
+
+    <div class="section card">
+      <h3>阶段漏斗</h3>
+      <table id="funnelTable">
+        <thead><tr><th>Stage</th><th>Count</th></tr></thead>
+        <tbody></tbody>
+      </table>
+    </div>
+
+    <div class="section card">
+      <h3>Trace 详情</h3>
+      <pre id="traceResult">暂无数据</pre>
+    </div>
+
+    <script>
+      async function fetchDashboard() {
+        const res = await fetch('/api/dashboard?minutes=5');
+        const data = await res.json();
+        document.getElementById('total').textContent = data.total;
+        document.getElementById('success').textContent = data.success_rate + '%';
+        document.getElementById('timeout').textContent = data.timeout_rate + '%';
+        document.getElementById('latency').textContent = data.p95_ms + '/' + data.p99_ms + ' ms';
+
+        const tbody = document.querySelector('#funnelTable tbody');
+        tbody.innerHTML = '';
+        data.stage_funnel.forEach(item => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td>${item.stage}</td><td>${item.count}</td>`;
+          tbody.appendChild(tr);
+        });
+      }
+
+      async function simulate() {
+        const payload = { vin: 'LXYZ1234567890001', cmd_type: 'DOOR_UNLOCK' };
+        const res = await fetch('/api/commands/simulate', {
+          method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify(payload)
+        });
+        const data = await res.json();
+        document.getElementById('traceInput').value = data.trace_id;
+        document.getElementById('traceResult').textContent = JSON.stringify(data, null, 2);
+        fetchDashboard();
+      }
+
+      async function searchTrace() {
+        const traceId = document.getElementById('traceInput').value.trim();
+        if (!traceId) return;
+        const res = await fetch('/api/traces/' + traceId);
+        if (!res.ok) {
+          document.getElementById('traceResult').textContent = '未找到该 traceId';
+          return;
+        }
+        const data = await res.json();
+        document.getElementById('traceResult').textContent = JSON.stringify(data, null, 2);
+      }
+
+      setInterval(fetchDashboard, 10000);
+      fetchDashboard();
+    </script>
+  </body>
+</html>
