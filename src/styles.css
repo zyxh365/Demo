@@ -1,0 +1,22 @@
+:root {
+  background: #020a1f;
+}
+
+body {
+  margin: 0;
+  font-family: Inter, 'PingFang SC', 'Microsoft Yahei', sans-serif;
+}
+
+.panel {
+  background: linear-gradient(145deg, rgba(20, 45, 90, 0.6), rgba(7, 19, 46, 0.8));
+  border: 1px solid rgba(47, 139, 255, 0.25);
+}
+
+.topoPlaceholder {
+  height: 120px;
+  border: 1px dashed rgba(47, 139, 255, 0.45);
+  display: grid;
+  place-items: center;
+  margin-bottom: 16px;
+  color: #8ec5ff;
+}
