@@ -1,5 +1,5 @@
 :root {
-  background: #020a1f;
+  background: radial-gradient(circle at 20% 15%, #133367 0%, #030b1d 60%);
 }
 
 body {
@@ -12,11 +12,33 @@ body {
   border: 1px solid rgba(47, 139, 255, 0.25);
 }
 
-.topoPlaceholder {
-  height: 120px;
-  border: 1px dashed rgba(47, 139, 255, 0.45);
-  display: grid;
-  place-items: center;
-  margin-bottom: 16px;
-  color: #8ec5ff;
+.topologySvg {
+  width: 100%;
+  height: auto;
+  min-height: 200px;
+  background: linear-gradient(180deg, rgba(6, 16, 40, 0.7), rgba(3, 10, 25, 0.9));
+  border: 1px solid rgba(73, 149, 255, 0.18);
+  border-radius: 10px;
+}
+
+.topoNode {
+  fill: rgba(20, 42, 84, 0.9);
+  stroke: rgba(91, 165, 255, 0.75);
+  stroke-width: 1.2;
+}
+
+.nodeTitle {
+  fill: #cfe8ff;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.nodeMeta {
+  fill: #7fb0e8;
+  font-size: 10px;
+}
+
+.edgeLabel {
+  fill: #7ed8ff;
+  font-size: 10px;
 }
